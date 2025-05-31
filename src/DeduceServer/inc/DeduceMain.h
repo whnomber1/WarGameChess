@@ -2,6 +2,7 @@
 #define DEDUCEMAIN_H
 
 #include <QThread>
+#include <QElapsedTimer>
 
 class DeduceMain : public QThread
 {

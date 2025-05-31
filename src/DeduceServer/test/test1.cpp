@@ -4,9 +4,9 @@
 
 class GameEngine {
 private:
-    static constexpr int TARGET_FPS = 60;
+    static constexpr int TARGET_FPS = 40;
     static constexpr double TARGET_FRAME_TIME = 1.0 / TARGET_FPS; // 16.67ms
-
+    int showcont = 3;
     bool running = true;
     int frameCount = 0;
 
@@ -18,7 +18,7 @@ public:
         auto nextFrameTime = std::chrono::steady_clock::now();
         auto startTime = nextFrameTime;
 
-        while (running && frameCount < 600) { // 运行10秒
+        while (running) { // 运行10秒
             // 游戏逻辑更新
             update();
 
@@ -26,6 +26,14 @@ public:
             render();
 
             frameCount++;
+            if (frameCount % (TARGET_FPS * showcont) == 0) {
+                auto endTime = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+                startTime = endTime;
+                std::cout << "实际运行时间: " << duration.count() << "ms, "
+                          << "平均FPS: " << (static_cast<double>(TARGET_FPS * showcont) * 1000.0 / duration.count()) << std::endl;
+
+            }
 
             // 计算下一帧的时间点
             nextFrameTime += std::chrono::microseconds(static_cast<long>(TARGET_FRAME_TIME * 1000000));
@@ -49,7 +57,7 @@ public:
         auto startTime = std::chrono::high_resolution_clock::now();
         auto lastFrameTime = startTime;
 
-        while (running && frameCount < 600) {
+        while (running) {
             auto currentTime = std::chrono::high_resolution_clock::now();
 
             // 计算上一帧的实际耗时
@@ -60,17 +68,34 @@ public:
 
             // 渲染
             render();
-
-            frameCount++;
             lastFrameTime = currentTime;
+            frameCount++;
+
+            if (frameCount % (TARGET_FPS * showcont) == 0) {
+                auto endTime = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+                startTime = endTime;
+                std::cerr << "实际运行时间: " << duration.count() << "ms, "
+                          << "平均FPS: " << (static_cast<double>(TARGET_FPS * showcont) * 1000.0 / duration.count()) << std::endl;
+
+            }
+
 
             // 计算需要等待的时间
             auto frameEndTime = std::chrono::high_resolution_clock::now();
             auto frameProcessTime = std::chrono::duration<double>(frameEndTime - currentTime).count();
 
-            double sleepTime = TARGET_FRAME_TIME - frameProcessTime;
-            if (sleepTime > 0) {
-                std::this_thread::sleep_for(std::chrono::duration<double>(sleepTime));
+            static int sleepint =0;
+            if (frameCount % (TARGET_FPS) == 0) {
+                std::cout << "TARGET_FRAME_TIME: " << TARGET_FRAME_TIME
+                          << "  detatime: " << (TARGET_FRAME_TIME - frameProcessTime)
+                          << "  sleepint: " << sleepint <<  std::endl;
+                sleepint=0;
+            }
+            if (TARGET_FRAME_TIME > frameProcessTime) {
+                sleepint++;
+                std::this_thread::sleep_for(std::chrono::duration<double>(TARGET_FRAME_TIME - frameProcessTime));
+
             }
         }
 
@@ -89,10 +114,12 @@ public:
         auto startTime = std::chrono::high_resolution_clock::now();
         auto nextFrameTime = startTime;
 
-        while (running && frameCount < 600) { // 运行5秒，因为CPU占用高
+        while (running)
+        { // 运行5秒，因为CPU占用高
             auto currentTime = std::chrono::high_resolution_clock::now();
 
-            if (currentTime >= nextFrameTime) {
+            if (currentTime >= nextFrameTime)
+            {
                 // 游戏逻辑更新
                 update();
 
@@ -100,6 +127,14 @@ public:
                 render();
 
                 frameCount++;
+                if (frameCount % (TARGET_FPS * showcont) == 0) {
+                    auto endTime = std::chrono::high_resolution_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+                    startTime = endTime;
+                    std::cerr << "实际运行时间: " << duration.count() << "ms, "
+                              << "平均FPS: " << ((TARGET_FPS * showcont) * 1000.0 / duration.count()) << std::endl;
+
+                }
 
                 // 设置下一帧时间
                 nextFrameTime += std::chrono::microseconds(static_cast<long>(TARGET_FRAME_TIME * 1000000));
@@ -107,6 +142,13 @@ public:
 
             // 忙等待 - 不推荐在实际项目中使用，除非需要极高精度
             // std::this_thread::yield(); // 可以添加这行来减少CPU占用
+
+            auto frameEndTime = std::chrono::high_resolution_clock::now();
+            auto frameProcessTime = std::chrono::duration<double>(frameEndTime - currentTime).count();
+            if(TARGET_FRAME_TIME > frameProcessTime)
+            {
+                std::this_thread::sleep_for(std::chrono::duration<double>(TARGET_FRAME_TIME*0.05));
+            }
         }
 
         auto endTime = std::chrono::high_resolution_clock::now();
@@ -122,7 +164,7 @@ public:
         // 例如：物理计算、AI更新、输入处理等
 
         // 模拟一些处理时间
-        std::this_thread::sleep_for(std::chrono::microseconds(1000)); // 1ms的模拟处理时间
+        // std::this_thread::sleep_for(std::chrono::microseconds(1000)); // 1ms的模拟处理时间
     }
 
     // 渲染函数
@@ -132,7 +174,7 @@ public:
 
         // 每100帧输出一次信息
         if (frameCount % 100 == 0) {
-            std::cout << "Frame: " << frameCount << std::endl;
+            // std::cout << "Frame: " << frameCount << std::endl;
         }
     }
 
@@ -212,15 +254,41 @@ int main() {
     std::cout << "=== C++ 游戏引擎帧循环实现示例  ===\n\n" << std::endl;
 
     // 测试不同的循环方法
-    engine.runWithSleepUntil();
+    // engine.runWithSleepUntil();
 
-    engine.runWithDynamicTiming();
+    // engine.runWithDynamicTiming();
 
     engine.runWithBusyWait(); // 注释掉，因为CPU占用高
 
-    // 高级循环示例
-    AdvancedGameEngine advEngine;
-    advEngine.runFixedTimestep();
+    // // 高级循环示例
+    // AdvancedGameEngine advEngine;
+    // advEngine.runFixedTimestep();
+
+    // timeBeginPeriod(1); // 设置系统全局计时器分辨率为 1ms
+
+    // const std::chrono::microseconds frameDuration(16000);
+    // auto frameStart = std::chrono::steady_clock::now();
+    // int frameCount=0;
+    // auto startTime = std::chrono::steady_clock::now();
+    // while (1)
+    // {
+    //     // QThread::usleep(16000);
+    //     // auto frameEnd = std::chrono::steady_clock::now();
+    //     // auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(frameEnd - frameStart);
+    //     frameCount++;
+    //     if ((frameCount % 100) == 0)
+    //     {
+    //         auto endTime = std::chrono::high_resolution_clock::now();
+    //         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    //         startTime = endTime;
+    //         std::cout<< "frameCount: " <<frameCount << ", 实际运行时间: " << duration.count() << "ms, "
+    //                   << "平均FPS: " << (static_cast<double>(100) * 1000.0 / duration.count()) << std::endl;
+
+    //     }
+
+    //     std::this_thread::sleep_for(frameDuration);
+    // }
+
 
     std::cout << "所有测试完成！\n";
     return 0;
