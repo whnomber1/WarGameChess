@@ -9,6 +9,6 @@
 *.pb.h
 *.retry
 *.user
-
+*_export.h
 build
 

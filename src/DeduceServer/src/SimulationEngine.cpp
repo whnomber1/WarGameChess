@@ -2,10 +2,15 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <QCoreApplication>
+#include <DataDistributionClient.h>
+#include <QDateTime>
+#include <CJsonVariant.h>
 
 SimulationEngine::SimulationEngine()
     : IGameEngine()
 {
+    m_curTimeSpeed = m_targetFPS;
 }
 
 SimulationEngine::~SimulationEngine()
@@ -15,6 +20,9 @@ SimulationEngine::~SimulationEngine()
 
 void SimulationEngine::engRun()
 {
+    // QCoreApplication::pr
+    m_startDateTime = QDateTime::currentSecsSinceEpoch();
+
     runWithBusyWait();
 }
 
@@ -56,7 +64,6 @@ void SimulationEngine::runWithDynamicTiming()
     frameCount = 0;
     auto startTime = std::chrono::high_resolution_clock::now();
     auto lastFrameTime = startTime;
-
     while (m_IsRunning)
     {
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -96,7 +103,6 @@ void SimulationEngine::runWithDynamicTiming()
         if (m_targetFrameTime > frameProcessTime)
         {
             std::this_thread::sleep_for(std::chrono::duration<double>(m_targetFrameTime - frameProcessTime));
-
         }
     }
 }
@@ -112,36 +118,53 @@ void SimulationEngine::runWithBusyWait()
     while (m_IsRunning)
     { // 运行5秒，因为CPU占用高
         auto currentTime = std::chrono::high_resolution_clock::now();
+        static int iii=0;
 
         if (currentTime >= nextFrameTime)
         {
             // 游戏逻辑更新
             updateSimTime(m_curStepLen);
+            int ii=10000000000;
+            // std::this_thread::sleep_for(std::chrono::duration<double>(m_targetFrameTime*2));
 
             // 渲染
             render();
-
             frameCount++;
+            m_currentDateTime = m_startDateTime + frameCount * m_curStepLen;
+
             if (canShowLogInfo())
             {
                 auto endTime = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
                 startTime = endTime;
-                std::cerr << "实际运行时间: " << duration.count() << "ms, "
-                          << "平均FPS: " << ((m_targetFPS * m_showcont) * 1000.0 / duration.count()) << std::endl;
+                std::cerr << "average runtime: " << duration.count() << "ms, "
+                          << "average FPS: " << ((m_targetFPS * m_showcont) * 1000.0 / duration.count())
+                          << ", iii: " << iii << "\n"
+                          << ", currentTime: " << currentTime.time_since_epoch().count()
+                          << ", nextFrameTime: " << nextFrameTime.time_since_epoch().count()
+                          << std::endl;
+                iii=0;
             }
 
             // 设置下一帧时间
-            nextFrameTime += std::chrono::microseconds(static_cast<long>(m_targetFrameTime * 1000000));
+            nextFrameTime = nextFrameTime + std::chrono::microseconds(static_cast<long>(m_targetFrameTime * 1000000));
+        }
+        else
+        {
+            // if (canShowLogInfo())
+            {
+                // std::cout << "111111111" << std::endl;
+            }
         }
 
         // 忙等待 - 不推荐在实际项目中使用，除非需要极高精度
         // std::this_thread::yield(); // 可以添加这行来减少CPU占用
-
+        QCoreApplication::processEvents();
         auto frameEndTime = std::chrono::high_resolution_clock::now();
         auto frameProcessTime = std::chrono::duration<double>(frameEndTime - currentTime).count();
         if(m_targetFrameTime > frameProcessTime)
         {
+            iii++;
             std::this_thread::sleep_for(std::chrono::duration<double>(m_targetFrameTime*0.05));
         }
     }
@@ -151,6 +174,11 @@ bool SimulationEngine::canShowLogInfo(int num)
 {
     if(!num) num = m_showcont;
     return m_showFpsInfo && (frameCount % (m_targetFPS * num) == 0);
+}
+
+bool SimulationEngine::isFrameCycleNum(float num)
+{
+    return (frameCount % static_cast<int>(m_targetFPS * num) == 0);
 }
 
 void SimulationEngine::updateLongInfo(std::string ilog)
@@ -171,6 +199,12 @@ void SimulationEngine::updateSimTime(double stepLen)
     // 模拟一些处理时间
     // std::this_thread::sleep_for(std::chrono::microseconds(1000)); // 1ms的模拟处理时间
     updateLongInfo(std::string("stepLen: ") + std::to_string(stepLen));
+    if(isFrameCycleNum(0.5))
+    {
+        CJsonVariant var;
+        var.setValue("simTime", m_currentDateTime);
+        DataDistributionClient::GetInstance()->SendClientMessage(var.GetJsonString());
+    }
 }
 
 void SimulationEngine::render()
@@ -191,6 +225,7 @@ void SimulationEngine::stop()
 
 void SimulationEngine::setRunFPS(int fnum)
 {
+    m_curTimeSpeed = fnum;
     if(fnum > m_maxFpsNum)
     {
         m_curStepLen = static_cast<double>(fnum) / static_cast<double>(m_maxFpsNum);

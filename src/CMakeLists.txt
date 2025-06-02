@@ -1,1 +1,2 @@
 add_subdirectory(DeduceServer)
+add_subdirectory(DataDistribution)

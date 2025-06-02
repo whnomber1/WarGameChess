@@ -1,12 +1,18 @@
 #include <iostream>
 #include <SimulationEngine.h>
+#include <DataDistributionClient.h>
+#include <QApplication>
 
-int main()
+int main(int argc, char *argv[])
 {
 
+    QApplication app(argc, argv);
+
+    DataDistributionClient::GetInstance();
     SimulationEngine eng;
-    eng.setRunFPS(25);
+    eng.setRunFPS(20);
     eng.engRun();
     std::cout << "所有测试完成！\n";
-    return 0;
+
+    return app.exec();
 }

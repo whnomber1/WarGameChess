@@ -28,7 +28,7 @@ set(CMAKE_AUTORCC ON)
 # find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
-set(CMAKE_AUTOUIC_SEARCH_PATHS ui)
+# set(CMAKE_AUTOUIC_SEARCH_PATHS ui)
 
 
 
@@ -36,8 +36,11 @@ add_WGCtarget(${CURPRONAME} EXECUTABLE
     PHEADERS ${PROJECT_HEADERS}
     PSRCS ${PROJECT_SOURCES}
     PUIS ${PROJECT_UIS}
+    LKLIBS Qt5::Widgets
+    PROLKLIBS DataDistribution
 )
 
-target_link_libraries(${CURPRONAME} PRIVATE Qt5::Widgets)
+# target_link_libraries(${CURPRONAME} PRIVATE Qt5::Widgets)
 # target_link_libraries(${CURPRONAME} PRIVATE winmm)
+# target_link_libraries(${CURPRONAME} PRIVATE Qt5Qmqtt)
 

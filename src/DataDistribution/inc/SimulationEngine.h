@@ -4,6 +4,7 @@
 #include <IGameEngine.h>
 #include <string>
 
+
 class SimulationEngine: public IGameEngine
 {
 public:
@@ -30,15 +31,11 @@ private:
     void runWithBusyWait();
 
     bool canShowLogInfo(int num=0);
-    bool isFrameCycleNum(float num=1.f);
 
     void updateLongInfo(std::string ilog);
 
 private:
     double m_curStepLen=1.0;
-    int m_curTimeSpeed=1;
-    long long m_currentDateTime;
-    long long m_startDateTime;
 };
 
 #endif //SIMULATIONENGINE_H

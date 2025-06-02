@@ -46,7 +46,7 @@ public:
 protected:
     //fps
     int m_targetFPS = 4;
-    int m_maxFpsNum = 20;
+    int m_maxFpsNum = 60;
     //每帧的运行时间
     double m_targetFrameTime;
     bool m_IsRunning = true;
