@@ -22,6 +22,7 @@ public slots:
 private:
     DataDistributionClient();
     void initDataDistribution();
+    bool isDataDistClientConnected();
 private:
     QMQTT::Client *m_mqttclient=nullptr;
 };

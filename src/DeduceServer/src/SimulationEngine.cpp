@@ -115,6 +115,11 @@ void SimulationEngine::runWithBusyWait()
     auto startTime = std::chrono::high_resolution_clock::now();
     auto nextFrameTime = startTime;
 
+    using Clock = std::chrono::high_resolution_clock;
+    using Duration = Clock::duration;
+    using Period = Duration::period;
+    std::cout << "period: " << Period::num << "/" << Period::den << " s" << std::endl;
+    bool isUpdateFramtime=false;
     while (m_IsRunning)
     { // 运行5秒，因为CPU占用高
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -124,9 +129,22 @@ void SimulationEngine::runWithBusyWait()
         {
             // 游戏逻辑更新
             updateSimTime(m_curStepLen);
-            int ii=10000000000;
-            // std::this_thread::sleep_for(std::chrono::duration<double>(m_targetFrameTime*2));
-
+#if 0
+            if(isFrameCycleNum(0.1))
+            {
+                iii++;
+                auto tm1 = std::chrono::high_resolution_clock::now();
+                int ii=75000000;
+                while(ii)
+                {
+                    ii--;
+                }
+                auto tm2 = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(tm2 - tm1);
+                std::cout << "---average runtime: " << duration.count() << "ms, "<< std::endl;
+                // std::this_thread::sleep_for(std::chrono::duration<double>(m_targetFrameTime*2));
+            }
+#endif
             // 渲染
             render();
             frameCount++;
@@ -140,14 +158,22 @@ void SimulationEngine::runWithBusyWait()
                 std::cerr << "average runtime: " << duration.count() << "ms, "
                           << "average FPS: " << ((m_targetFPS * m_showcont) * 1000.0 / duration.count())
                           << ", iii: " << iii << "\n"
-                          << ", currentTime: " << currentTime.time_since_epoch().count()
+                          << "currentTime: " << (nextFrameTime + std::chrono::microseconds(static_cast<long>(m_targetFrameTime * 1000000))).time_since_epoch().count()
                           << ", nextFrameTime: " << nextFrameTime.time_since_epoch().count()
                           << std::endl;
                 iii=0;
             }
 
             // 设置下一帧时间
-            nextFrameTime = nextFrameTime + std::chrono::microseconds(static_cast<long>(m_targetFrameTime * 1000000));
+            if(isUpdateFramtime)
+            {
+                isUpdateFramtime = false;
+                nextFrameTime = currentTime + std::chrono::microseconds(static_cast<long>(m_targetFrameTime * 1000000));
+            }
+            else
+            {
+                nextFrameTime += std::chrono::microseconds(static_cast<long>(m_targetFrameTime * 1000000));
+            }
         }
         else
         {
@@ -164,8 +190,11 @@ void SimulationEngine::runWithBusyWait()
         auto frameProcessTime = std::chrono::duration<double>(frameEndTime - currentTime).count();
         if(m_targetFrameTime > frameProcessTime)
         {
-            iii++;
             std::this_thread::sleep_for(std::chrono::duration<double>(m_targetFrameTime*0.05));
+        }
+        else
+        {
+            isUpdateFramtime = true;
         }
     }
 }

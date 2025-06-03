@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
     DataDistributionClient::GetInstance();
     SimulationEngine eng;
-    eng.setRunFPS(20);
+    eng.setRunFPS(40);
     eng.engRun();
     std::cout << "所有测试完成！\n";
 

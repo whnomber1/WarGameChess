@@ -21,7 +21,7 @@ DataDistributionClient *DataDistributionClient::GetInstance()
 
 void DataDistributionClient::SendClientMessage(QString msg, quint16 mid)
 {
-    if(m_mqttclient)
+    if(isDataDistClientConnected())
     {
         static int num=0;
         QMQTT::Message message(mid, EXAMPLE_TOPIC,
@@ -63,7 +63,7 @@ void DataDistributionClient::initDataDistribution()
     {
         m_mqttclient = new QMQTT::Client(QHostAddress::LocalHost, 1883);
 
-        m_mqttclient->setHostName("192.168.1.85");
+        m_mqttclient->setHostName("127.0.0.1");
         m_mqttclient->setPort(1883);
         m_mqttclient->setClientId("my_qt_client");
         m_mqttclient->setCleanSession(true);
@@ -76,5 +76,10 @@ void DataDistributionClient::initDataDistribution()
         // // 建立连接
         m_mqttclient->connectToHost();
     }
+}
+
+bool DataDistributionClient::isDataDistClientConnected()
+{
+    return m_mqttclient && m_mqttclient->isConnectedToHost();
 }
 

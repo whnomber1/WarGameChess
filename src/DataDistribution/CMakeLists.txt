@@ -19,12 +19,17 @@ set(PROJECT_SOURCES
 set(PROJECT_UIS
 )
 
+set(ExternLibsSuffix)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(ExternLibsSuffix "d")
+endif()
+
 add_WGCtarget(${CURPRONAME} SHARED
    PHEADERS ${PROJECT_HEADERS}
     PSRCS ${PROJECT_SOURCES}
 #    PUIS ${PROJECT_UIS}
     INCLUDEDIRS inc/QtQmqtt
-    LKLIBS Qt5::Core Qt5::Widgets Qt5::Network Qt5Qmqtt
+    LKLIBS Qt5::Core Qt5::Widgets Qt5::Network Qt5Qmqtt${ExternLibsSuffix}
     OUTPUTDIR ${CMAKE_BINARY_DIR}/bin
 )
 

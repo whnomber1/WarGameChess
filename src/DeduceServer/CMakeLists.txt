@@ -21,12 +21,12 @@ set(PROJECT_SOURCES
 set(PROJECT_UIS
     ui/MainWindow.ui
 )
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+# set(CMAKE_AUTOUIC ON)
+# set(CMAKE_AUTOMOC ON)
+# set(CMAKE_AUTORCC ON)
 
 # find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
+# find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
 # set(CMAKE_AUTOUIC_SEARCH_PATHS ui)
 
