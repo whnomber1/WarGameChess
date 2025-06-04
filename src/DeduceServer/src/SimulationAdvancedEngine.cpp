@@ -32,7 +32,7 @@ void SimulationAdvancedEngine::runFixedTimestep() {
             frameTime = m_fixedTimestep;
         }
 
-        currentTime = newTime;
+        currentTime = newTime ;
         m_accumulator += frameTime;
 
         // 固定时间步长的物理更新

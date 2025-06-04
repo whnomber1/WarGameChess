@@ -178,9 +178,9 @@ void SimulationEngine::runWithBusyWait()
         else
         {
             // if (canShowLogInfo())
-            {
+            // {
                 // std::cout << "111111111" << std::endl;
-            }
+            // }
         }
 
         // 忙等待 - 不推荐在实际项目中使用，除非需要极高精度
