@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 include(cmake/functions.cmake)
 
+set(CMAKE_PREFIX_PATH "F:/wh/Qt/QtAll/5.15.2/msvc2019_64" CACHE PATH "Qt path")
+
 project(WarGameChess VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)

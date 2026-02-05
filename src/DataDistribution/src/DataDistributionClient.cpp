@@ -5,10 +5,9 @@
 #define EXAMPLE_TOPIC "qmqtt/exampletopic"
 #include <CJsonVariant.h>
 #include <QDateTime>
+#include <QRandomGenerator>
 
 static DataDistributionClient *S_DataDistInstance = nullptr;
-
-
 
 DataDistributionClient *DataDistributionClient::GetInstance()
 {
@@ -23,9 +22,10 @@ void DataDistributionClient::SendClientMessage(QString msg, quint16 mid)
 {
     if(isDataDistClientConnected())
     {
-        static int num=0;
+        CJsonVariant var(msg);
+        var.setValue("CurClientID", m_clientId);
         QMQTT::Message message(mid, EXAMPLE_TOPIC,
-                               msg.toUtf8());
+                               var.GetJsonString().toUtf8());
         m_mqttclient->publish(message);
     }
 }
@@ -36,13 +36,14 @@ void DataDistributionClient::clientHasConnectedSlt()
 
     // 订阅主题
     m_mqttclient->subscribe(EXAMPLE_TOPIC);
-    connect(m_mqttclient, &QMQTT::Client::received, [](const QMQTT::Message& msg){
+    connect(m_mqttclient, &QMQTT::Client::received, [this](const QMQTT::Message& msg){
         // qDebug() << msg.id() << "Message topic: " << msg.topic() << "  Message received: " << msg.payload();
-        CJsonVariant var(msg.payload());
-        if(var.isValid("simTime"))
-        {
-            qDebug() << QDateTime::fromSecsSinceEpoch(var.getValue("simTime").toInt()).toString("yyyy.MM.dd hh:mm:ss");
-        }
+        ReceiveMessageSig(QString::fromUtf8(msg.payload()));
+        // CJsonVariant var(msg.payload());
+        // if(var.isValid("simTime"))
+        // {
+        //     qDebug() << QDateTime::fromSecsSinceEpoch(var.getValue("simTime").toInt()).toString("yyyy.MM.dd hh:mm:ss");
+        // }
     });
 }
 
@@ -61,11 +62,12 @@ void DataDistributionClient::initDataDistribution()
 {
     if(!m_mqttclient)
     {
-        m_mqttclient = new QMQTT::Client(QHostAddress::LocalHost, 1883);
+        m_mqttclient = new QMQTT::Client(QHostAddress("127.0.0.1"), 1883);
 
-        m_mqttclient->setHostName("127.0.0.1");
-        m_mqttclient->setPort(1883);
-        m_mqttclient->setClientId("my_qt_client");
+        // m_mqttclient->setHostName("127.0.0.1");
+        // m_mqttclient->setPort(1883);
+        m_clientId = "my_client_"+QString::number(QRandomGenerator::global()->generate());
+        m_mqttclient->setClientId(m_clientId);
         m_mqttclient->setCleanSession(true);
         connect(m_mqttclient, SIGNAL(connected()), this,  SLOT(clientHasConnectedSlt()));
         connect(m_mqttclient, SIGNAL(disconnected()), this,  SLOT(clientHasConnectedSlt()));

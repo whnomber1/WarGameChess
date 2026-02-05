@@ -27,6 +27,7 @@ private:
     void runWithDynamicTiming();
 
     // 方法3: 使用忙等待的高精度循环（CPU密集型）
+    void runWithBusyWait1();
     void runWithBusyWait();
 
     bool canShowLogInfo(int num=0);
@@ -36,9 +37,11 @@ private:
 
 private:
     double m_curStepLen=1.0;
-    int m_curTimeSpeed=1;
+    int m_curFpsNum=1;
     long long m_currentDateTime;
     long long m_startDateTime;
+    bool m_updateFps=0;
+    uint64_t m_CurrentSimTime=0;
 };
 
 #endif //SIMULATIONENGINE_H

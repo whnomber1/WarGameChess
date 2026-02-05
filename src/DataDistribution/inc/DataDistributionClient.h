@@ -11,9 +11,10 @@ class Client;
 class DATADISTRIBUTION_API DataDistributionClient : public QObject
 {
     Q_OBJECT
+signals:
+      void ReceiveMessageSig(QString s);
 public:
     static DataDistributionClient *GetInstance();
-
     void SendClientMessage(QString msg, quint16 mid=0);
 public slots:
     void clientHasConnectedSlt();
@@ -25,6 +26,7 @@ private:
     bool isDataDistClientConnected();
 private:
     QMQTT::Client *m_mqttclient=nullptr;
+    QString m_clientId;
 };
 
 #endif // DATADISTRIBUTIONCLIENT_H

@@ -5,6 +5,8 @@ set(PROJECT_HEADERS
     inc/DeduceMain.h
     inc/SimulationEngine.h
     inc/SimulationAdvancedEngine.h
+    inc/DeduceWorker.h
+    inc/DataDistributioner.h
 )
 
 set(PROJECT_SOURCES
@@ -13,6 +15,8 @@ set(PROJECT_SOURCES
     src/DeduceMain.cpp
     src/SimulationEngine.cpp
     src/SimulationAdvancedEngine.cpp
+    src/DeduceWorker.cpp
+    src/DataDistributioner.cpp
     # test/test1.cpp
     # test/test2.cpp
     # test/test3.cpp
@@ -36,7 +40,7 @@ add_WGCtarget(${CURPRONAME} EXECUTABLE
     PHEADERS ${PROJECT_HEADERS}
     PSRCS ${PROJECT_SOURCES}
     PUIS ${PROJECT_UIS}
-    LKLIBS Qt5::Widgets
+    LKLIBS Qt5::Widgets Qt5::Core
     PROLKLIBS DataDistribution
 )
 

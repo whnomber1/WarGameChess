@@ -21,6 +21,8 @@ public:
 
 private slots:
     void on_pushButton_clicked();
+    void receiveMessageSlt(QString str);
+    void spdValueChangedSlt();
 
 private:
     Ui::MainWindow *ui;
